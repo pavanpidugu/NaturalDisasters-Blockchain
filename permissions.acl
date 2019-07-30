@@ -1,0 +1,141 @@
+/**
+ * Access Control List for the bidding network.
+ */
+
+ rule MembersCanViewALLData {
+     description: "Allow all participants read access to all resources"
+     participant(m): "org.walmart.product.disaster.User"
+     operation: READ
+     resource(v): "org.walmart.product.disaster.*"
+     condition: (v.getIdentifier() == m.getIdentifier())
+     action: ALLOW
+ }
+
+ rule VictimCanViewMemberData {
+     description: "Allow all participants read access to all resources"
+     participant: "org.walmart.product.disaster.Victim"
+     operation: READ
+     resource: "org.walmart.product.disaster.Supplier"
+     action: ALLOW
+ }
+
+ rule VictimCanUpdateData {
+     description: "Allow all seller access to all resources"
+     participant(m): "org.walmart.product.disaster.Victim"
+     operation: ALL
+     resource(v): "org.walmart.product.disaster.Victim"
+     condition: (v.getIdentifier() == m.getIdentifier())
+     action: ALLOW
+ }
+
+rule ProductView {
+    description: "Allow Users all access to their products"
+    participant: "org.walmart.product.disaster.User"
+    operation: READ
+    resource: "org.walmart.product.disaster.Product"
+    action: ALLOW
+}
+
+rule ProductAccess {
+    description: "Allow Users all access to their products"
+    participant(m): "org.walmart.product.disaster.User"
+    operation: ALL
+    resource(v): "org.walmart.product.disaster.Product"
+    condition: (v.owner.getIdentifier() == m.getIdentifier())
+    action: ALLOW
+}
+
+rule ProductListingView {
+    description: "Allow the owner of a product total access to their listing"
+    participant: "org.walmart.product.disaster.User"
+    operation: READ
+    resource: "org.walmart.product.disaster.ProductListing"
+    action: ALLOW
+}
+
+rule ProductListingOwner {
+    description: "Allow the owner of a product total access to their listing"
+    participant(m): "org.walmart.product.disaster.User"
+    operation: ALL
+    resource(v): "org.walmart.product.disaster.ProductListing"
+    condition: (v.product.owner.getIdentifier() == m.getIdentifier())
+    action: ALLOW
+}
+
+rule AddProduct{
+    description: "Allow Sellers to add new product"
+    participant(m): "org.walmart.product.disaster.Victim"
+    operation: CREATE
+    resource(v): "org.walmart.product.disaster.AddProduct"
+    condition: (v.owner.getIdentifier() == m.getIdentifier())
+    action: ALLOW
+}
+
+rule MakeOffer{
+      description: "Allow members to bid for the product"
+      participant(m): "org.walmart.product.disaster.User"
+      operation: CREATE
+      resource(v): "org.walmart.product.disaster.Offer"
+      condition: (v.member.getIdentifier() == m.getIdentifier())
+      action: ALLOW
+}
+
+rule MembersCanUpdateProductListing {
+    description: "Allow the members to update their bid for the listing"
+    participant: "org.walmart.product.disaster.User"
+    operation: UPDATE
+    resource: "org.walmart.product.disaster.ProductListing"
+    action: ALLOW
+}
+
+rule StartBiddingProcessTransaction {
+     description: "Allow owner of product to start the bidding"
+     participant(m): "org.walmart.product.disaster.User"
+     operation: CREATE
+     resource(v): "org.walmart.product.disaster.StartBidding"
+     condition: (v.product.owner.getIdentifier() == m.getIdentifier())
+     action: ALLOW
+ }
+
+ rule CloseBiddingProcessTransaction {
+     description: "Allow owner of product to close the bidding"
+     participant(m): "org.walmart.product.disaster.User"
+     operation: CREATE
+     resource(v): "org.walmart.product.disaster.CloseBidding"
+     condition: (v.listing.product.owner.getIdentifier() == m.getIdentifier())
+     action: ALLOW
+ }
+
+rule CloseBiddingProcessTransactionUpdate {
+      description: "Allow members to bid for the product"
+      participant(m): "org.walmart.product.disaster.User"
+      operation: UPDATE
+      resource(v): "org.walmart.product.disaster.User"
+      transaction(tx): "org.walmart.product.disaster.CloseBidding"
+      condition: (tx.listing.product.owner.getIdentifier() == m.getIdentifier())
+      action: ALLOW
+}
+
+rule SystemACL {
+  description:  "System ACL to permit all access"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}

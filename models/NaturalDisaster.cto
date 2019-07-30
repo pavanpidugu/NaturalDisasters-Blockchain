@@ -1,0 +1,64 @@
+
+namespace org.walmart.product.disaster
+
+
+enum ListingState {
+  o REQUESTED
+  o RESERVE_NOT_MET
+  o ORDER_PLACED
+}
+
+participant Supplier extends User {
+  o String organisation
+}
+
+abstract participant User identified by email {
+  o String email
+  o Double balance
+  o Product[] products
+}
+
+
+participant Victim extends User {
+  o String firstName
+  o String lastName
+}
+
+asset Product identified by productId {
+  o String productId
+  o String description
+  --> User owner
+}
+
+asset ProductListing identified by listingId {
+  o String listingId
+  o Double desiredQuantity
+  o ListingState state
+  o Offer[] offers optional
+  --> Product product
+}
+
+
+transaction Offer {
+  o Double bidPrice
+  o Double onhandQuantity
+  --> ProductListing listing
+  --> User supplier
+}
+
+transaction CloseBidding {
+  --> ProductListing listing
+}
+
+transaction StartBidding {
+  o String listingId
+  o Double desiredQuantity
+  --> Product product
+}
+
+
+transaction AddProduct {
+  o String productId
+  o String description
+  --> Victim owner
+}
